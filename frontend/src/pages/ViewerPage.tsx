@@ -1,9 +1,20 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import SplatViewer, { type ViewerStats } from '@/components/SplatViewer';
+import SplatViewer, { type ViewerStats, type ControlMode } from '@/components/SplatViewer';
 import { useStore } from '@/store/useStore';
 import { fetchModels } from '@/api/client';
 import type { SplatModel } from '@/types';
+
+const MODE_LABEL: Record<ControlMode, string> = {
+  orbit: '环视',
+  tumble: '自由翻滚',
+  walk: '漫游',
+};
+const MODE_HINT: Record<ControlMode, string> = {
+  orbit: '左键旋转 · 右键平移 · 滚轮缩放',
+  tumble: '左键任意方向翻滚 · 右键平移 · 滚轮缩放',
+  walk: 'WASD/方向键移动 · R/F 升降 · 按住左键拖动转视角',
+};
 
 export default function ViewerPage() {
   const { id } = useParams();
@@ -25,7 +36,7 @@ export default function ViewerPage() {
   const [error, setError] = useState<string | null>(null);
   const [alphaInput, setAlphaInput] = useState(5);
   const [appliedAlpha, setAppliedAlpha] = useState(5);
-  const [freeTumble, setFreeTumble] = useState(false);
+  const [mode, setMode] = useState<ControlMode>('orbit');
 
   if (!model) {
     return (
@@ -47,7 +58,7 @@ export default function ViewerPage() {
         url={model.url}
         format={model.format}
         alphaThreshold={appliedAlpha}
-        freeTumble={freeTumble}
+        controlMode={mode}
         viewerDefaults={model.viewerDefaults}
         onStats={setStats}
         onLoaded={() => setLoaded(true)}
@@ -76,26 +87,29 @@ export default function ViewerPage() {
       {/* 底部控制条 */}
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-xl bg-black/60 px-4 py-3 text-xs text-slate-300 backdrop-blur">
         <div className="flex items-center gap-4">
-          <span>
-            {freeTumble ? '左键自由翻滚 · 右键平移 · 滚轮缩放' : '左键旋转 · 右键平移 · 滚轮缩放'}
-          </span>
-          <button
-            onClick={() => setFreeTumble((v) => !v)}
-            className={`rounded px-2 py-1 transition ${
-              freeTumble
-                ? 'bg-accent text-white'
-                : 'bg-slate-700 text-slate-200 hover:bg-slate-600'
-            }`}
-            title="自由翻滚模式：纵向也可无限翻转（Trackball）"
-          >
-            自由翻滚 {freeTumble ? '开' : '关'}
-          </button>
+          <span className="text-slate-400">{MODE_HINT[mode]}</span>
+          <div className="flex items-center gap-1">
+            {(['orbit', 'tumble', 'walk'] as ControlMode[]).map((m) => (
+              <button
+                key={m}
+                onClick={() => setMode(m)}
+                className={`rounded px-2 py-1 transition ${
+                  mode === m
+                    ? 'bg-accent text-white'
+                    : 'bg-slate-700 text-slate-200 hover:bg-slate-600'
+                }`}
+                title={m === 'walk' ? '第一人称漫游，适合室内房间' : ''}
+              >
+                {MODE_LABEL[m]}
+              </button>
+            ))}
+          </div>
           <div className="flex items-center gap-2">
-            <span>剔除阈值 {alphaInput}</span>
+            <span>剔除杂点 {alphaInput}</span>
             <input
               type="range"
               min={0}
-              max={50}
+              max={80}
               value={alphaInput}
               onChange={(e) => setAlphaInput(Number(e.target.value))}
               className="w-28"

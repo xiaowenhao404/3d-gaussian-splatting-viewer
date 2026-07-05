@@ -131,6 +131,8 @@ def main() -> int:
     ap.add_argument("--cap_max", type=int, default=300000)  # 8GB 显存安全上限
     ap.add_argument("--sh_degree", type=int, default=3)
     ap.add_argument("--ssim_lambda", type=float, default=0.2)
+    ap.add_argument("--opacity_reg", type=float, default=0.01)  # MCMC 抑制漂浮
+    ap.add_argument("--scale_reg", type=float, default=0.01)    # MCMC 抑制尖刺
     ap.add_argument("--save_ply", action="store_true")
     ap.add_argument("--disable_viewer", action="store_true")  # 兼容占位
     args = ap.parse_args()
@@ -202,6 +204,10 @@ def main() -> int:
             renders.permute(0, 3, 1, 2), pixels.permute(0, 3, 1, 2), win
         )
         loss = l1 * (1 - args.ssim_lambda) + ssim_loss * args.ssim_lambda
+        # MCMC 正则项：抑制"又大又尖"的漂浮高斯（对齐官方 simple_trainer）。
+        # 缺少 scale_reg 会放任高斯长成飞散尖刺，这是残片的训练源头。
+        loss = loss + args.opacity_reg * torch.sigmoid(splats["opacities"]).abs().mean()
+        loss = loss + args.scale_reg * torch.exp(splats["scales"]).abs().mean()
         loss.backward()
 
         for opt in optimizers.values():
