@@ -5,12 +5,12 @@ import type { SplatModel } from '@/types';
 
 // 实测消融数据（tandt/train，RTX 4070 Laptop 8GB，data_factor=4）
 const STEP_ABLATION = [
-  { step: '3k', psnr: '19.8', time: '~35s', note: '仅测流程，明显模糊' },
-  { step: '7k', psnr: '21.9', time: '~2min', note: '主体可辨，边缘偏软' },
+  { step: '3k', psnr: '19.5', time: '~35s', note: '仅测流程，明显模糊' },
+  { step: '7k', psnr: '21.4', time: '~80s', note: '主体可辨，边缘偏软' },
   { step: '30k', psnr: '26.1', time: '~15min', note: '清晰，文字可读' },
 ];
 const REG_ABLATION = [
-  { name: '无正则项', gauss: '287,301', size: '68 MB', note: '大量飞散尖刺/残片' },
+  { name: '无正则项', gauss: '281,406', size: '63 MB', note: '大量飞散尖刺/残片' },
   { name: '有正则项 (opacity+scale)', gauss: '226,174', size: '50 MB', note: '残片显著减少' },
 ];
 
