@@ -63,7 +63,6 @@ def download(url: str, dst: Path) -> bool:
             dst.unlink(missing_ok=True)
         return False
 
-
 def main() -> int:
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     if OUT_PATH.exists() and OUT_PATH.stat().st_size > 0:
