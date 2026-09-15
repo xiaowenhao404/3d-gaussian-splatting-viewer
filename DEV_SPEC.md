@@ -1,6 +1,6 @@
 # DEV_SPEC — 基于 3D Gaussian Splatting 的交互式三维重建与可视化系统
 
-> 计算机视觉课程设计 · 开发规范文档（Development Specification）
+> 开发规范文档（Development Specification）
 > 版本：v1.0 · 日期：2026-06-15
 > 配套报告：`基于三维高斯泼溅与辐射场技术的高性能三维重建系统设计与实现研究报告.md`
 
